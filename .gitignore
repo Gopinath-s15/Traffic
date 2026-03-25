@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.pyc
+DATABASE.db
+model.pkl
+database.db

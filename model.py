@@ -27,9 +27,10 @@ def generate_synthetic_data(num_samples=500):
     
     risks = []
     for s, w, t in zip(speeds, weathers, times):
-        if (s > 80 and w > 0) or (s > 100) or (s > 70 and w == 2 and t == 1):
+        # Change: s >= 80 instead of s > 80 to match exact requirements (Speed = 80, Rainy = High Risk)
+        if (s >= 80 and w > 0) or (s >= 100) or (s > 70 and w == 2 and t == 1):
             risks.append(2) # High Risk
-        elif (s > 60 and w > 0) or (s > 80):
+        elif (s > 60 and w > 0) or (s > 70):
             risks.append(1) # Medium Risk
         else:
             risks.append(0) # Low Risk

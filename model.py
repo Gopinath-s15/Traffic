@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
 import joblib
 import os
 
@@ -62,9 +63,42 @@ def train_model():
     model.fit(X_train, y_train)
     
     predictions = model.predict(X_test)
-    acc = accuracy_score(y_test, predictions)
-    print(f"Model trained successfully. Accuracy on test set: {acc * 100:.2f}%")
+    train_acc = accuracy_score(y_train, model.predict(X_train))
+    test_acc = accuracy_score(y_test, predictions)
+    print(f"Model trained successfully. Accuracy on test: {test_acc * 100:.2f}%")
     
+    # Modern Dark Cyberpunk Graph
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots(figsize=(8, 5))
+    fig.patch.set_facecolor('#0b1121')
+    ax.set_facecolor('#0b1121')
+    
+    categories = ['Training Accuracy', 'Testing Accuracy']
+    accuracies = [train_acc * 100, test_acc * 100]
+    
+    bars = ax.bar(categories, accuracies, color='#00f2fe', edgecolor='#4facfe', linewidth=2, width=0.4)
+    for bar in bars:
+        bar.set_alpha(0.8)
+        
+    ax.set_title("Random Forest Performance", color='#ffffff', fontsize=16, fontweight='bold', pad=20)
+    ax.set_ylabel("Accuracy (%)", color='#a0aec0', fontsize=12)
+    ax.tick_params(colors='#a0aec0', labelsize=11)
+    
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_color('rgba(0, 242, 254, 0.3)')
+    ax.spines['left'].set_color('rgba(0, 242, 254, 0.3)')
+    
+    ax.set_ylim(0, 115)
+    
+    for bar in bars:
+        yval = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2, yval + 2, f"{yval:.1f}%", ha='center', va='bottom', color='#ffffff', fontweight='bold', fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig("accuracy_graph.png", facecolor=fig.get_facecolor(), transparent=True)
+    plt.close()
+
     joblib.dump(model, MODEL_FILE)
     print(f"Model saved to {MODEL_FILE}")
 

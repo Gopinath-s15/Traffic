@@ -10,6 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentLon = null;
     let riskCircle = null;
 
+    // Splash Screen Logic
+    const splashScreen = document.getElementById('splash-screen');
+    if (splashScreen) {
+        setTimeout(() => {
+            splashScreen.classList.add('hidden-splash');
+            setTimeout(() => {
+                splashScreen.remove(); // Remove from DOM fully after fade out
+            }, 800);
+        }, 1500); // Wait 1.5 seconds before fading out
+    }
+
     // Request notification permission on load
     if ("Notification" in window) {
         Notification.requestPermission();
@@ -220,5 +231,68 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("Failed to fetch history:", error);
         }
+    }
+
+    async function renderGraph() {
+        try {
+            const response = await fetch('/history');
+            const data = await response.json();
+            
+            let lowCount = 0;
+            let medCount = 0;
+            let highCount = 0;
+
+            data.forEach(item => {
+                if (item.risk_level === 'LOW RISK') lowCount++;
+                else if (item.risk_level === 'MEDIUM RISK') medCount++;
+                else if (item.risk_level === 'HIGH RISK') highCount++;
+            });
+
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Safe Zones', 'Caution Zones', 'Danger Zones'],
+                    datasets: [{
+                        label: 'Recorded Instances',
+                        data: [lowCount, medCount, highCount],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)', // green
+                            'rgba(245, 158, 11, 0.7)', // warning yellow
+                            'rgba(239, 68, 68, 0.7)'   // red
+                        ],
+                        borderColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        hoverBackgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#a0aec0', font: { family: 'Outfit', size: 14 } } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#a0aec0', stepSize: 1 },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff', font: { family: 'Outfit', size: 13, weight: 'bold' } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("Failed to render graph:", error);
+        }
+    }
+
+    const historyChartElement = document.getElementById('historyChart');
+    if (historyChartElement) {
+        renderGraph();
     }
 });

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import sqlite3
 import joblib
 import pandas as pd
@@ -104,6 +104,18 @@ def get_history():
 @app.route('/history-view')
 def history_page():
     return render_template('history.html')
+
+@app.route('/graph-view')
+def graph_page():
+    return render_template('graph.html')
+
+@app.route('/artifact-logo')
+def artifact_logo():
+    return send_from_directory(r'C:\Users\virat\.gemini\antigravity\brain\a4430a3a-2ef7-465c-9179-d74ef198c80f', 'traffic_logo_1776013508972.png')
+
+@app.route('/accuracy-graph')
+def accuracy_graph():
+    return send_from_directory(r'c:\Users\virat\Desktop\traffic', 'accuracy_graph.png')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

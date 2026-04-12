@@ -54,13 +54,22 @@ body {
     position: relative;
 }
 
+.header-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 0.5rem;
+}
+
 .header-icon {
-    width: 80px;
-    height: 80px;
+    width: 65px;
+    height: 65px;
     object-fit: contain;
-    margin-bottom: 1rem;
     animation: floatingIcon 4s ease-in-out infinite;
     filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.6));
+    mix-blend-mode: screen; /* Drops black background of AI image */
+    border-radius: 50%;
 }
 
 header h1 {
@@ -72,7 +81,7 @@ header h1 {
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
     animation: gradientShine 4s linear infinite;
     letter-spacing: -0.5px;
 }
@@ -417,7 +426,53 @@ tr:hover td {
 }
 
 @media (max-width: 850px) {
+    .header-title-row { flex-direction: column; gap: 10px; margin-bottom: 1rem; }
     header h1 { font-size: 2.2rem; }
-    .header-icon { width: 60px; height: 60px; }
+    .header-icon { width: 50px; height: 50px; margin-bottom: 0px; }
     .nav-link { padding: 0.6rem 1.5rem; font-size: 1rem; }
+}
+
+/* Splash Screen */
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #0b1121;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+}
+
+.splash-logo {
+    width: 150px;
+    animation: pulse-splash 1s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-splash {
+    0% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 10px #00f2fe); }
+    100% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 40px #4facfe); }
+}
+
+.hidden-splash {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Graph */
+.graph-container {
+    text-align: center;
+    padding: 1rem;
+}
+
+.graph-image {
+    max-width: 100%;
+    border-radius: 12px;
+    border: 2px solid rgba(0, 242, 254, 0.4);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+    margin-top: 1rem;
 }

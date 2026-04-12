@@ -11,19 +11,31 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#00f2fe">
+  <link rel="icon" type="image/png" href="/artifact-logo">
 </head>
 
 <body>
+  <!-- Splash Screen -->
+  <div id="splash-screen">
+    <img src="/artifact-logo" alt="Traffic Logo" class="splash-logo">
+    <h2 style="color: #00f2fe; margin-top:20px; font-family: 'Outfit', sans-serif;">Initializing System...</h2>
+  </div>
+
   <div class="dashboard">
     <header class="glow-header">
-      <img src="/static/shield.png" alt="Traffic Shield" class="header-icon">
-      <h1>Intelligent Traffic Safety</h1>
+      <div class="header-title-row">
+        <img src="/artifact-logo" alt="Traffic Light Logo" class="header-icon">
+        <h1>Intelligent Traffic Safety</h1>
+      </div>
       <p>AI-Powered Risk Prediction & Alerts</p>
     </header>
 
     <nav class="navbar">
       <a href="/" class="nav-link active">Dashboard</a>
       <a href="/history-view" class="nav-link">History Log</a>
+      <a href="/graph-view" class="nav-link">Graph View</a>
     </nav>
 
     <div class="main-content">
@@ -63,6 +75,13 @@
   </div>
 
   <script src="/static/script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js');
+      });
+    }
+  </script>
 </body>
 
 </html>

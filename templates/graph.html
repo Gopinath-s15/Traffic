@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>History - Intelligent Traffic Safety DSS</title>
+  <title>Intelligent Traffic Safety DSS - Graph</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +12,7 @@
   <link rel="manifest" href="/static/manifest.json">
   <meta name="theme-color" content="#00f2fe">
   <link rel="icon" type="image/png" href="/artifact-logo">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -26,28 +27,15 @@
 
     <nav class="navbar">
       <a href="/" class="nav-link">Dashboard</a>
-      <a href="/history-view" class="nav-link active">History Log</a>
-      <a href="/graph-view" class="nav-link">Graph View</a>
+      <a href="/history-view" class="nav-link">History Log</a>
+      <a href="/graph-view" class="nav-link active">Graph View</a>
     </nav>
 
     <div class="main-content">
-      <section class="history-section card">
-        <h2>Recent Predictions</h2>
-        <div class="table-container">
-          <table id="history-table">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Speed (km/h)</th>
-                <th>Weather</th>
-                <th>Time</th>
-                <th>Risk Level</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Data populated via JS -->
-            </tbody>
-          </table>
+      <section class="card history-section" style="width: 100%; max-width: 900px;">
+        <h2>Historical Risk Analysis</h2>
+        <div class="graph-container" style="position: relative; height: 50vh; width: 100%">
+          <canvas id="historyChart"></canvas>
         </div>
       </section>
     </div>

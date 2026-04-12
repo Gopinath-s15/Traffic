@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History - Intelligent Traffic Safety DSS</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="dashboard">
+    <header class="glow-header">
+      <img src="/static/shield.png" alt="Traffic Shield" class="header-icon">
+      <h1>Intelligent Traffic Safety</h1>
+      <p>AI-Powered Risk Prediction & Alerts</p>
+    </header>
+
+    <nav class="navbar">
+      <a href="/" class="nav-link">Dashboard</a>
+      <a href="/history-view" class="nav-link active">History Log</a>
+    </nav>
+
+    <div class="main-content">
+      <section class="history-section card">
+        <h2>Recent Predictions</h2>
+        <div class="table-container">
+          <table id="history-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Speed (km/h)</th>
+                <th>Weather</th>
+                <th>Time</th>
+                <th>Risk Level</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+
+</html>

@@ -10,7 +10,7 @@ app = Flask(__name__)
 DATABASE = 'database.db'
 MODEL_FILE = 'model.pkl'
 
-# Initialize SQLite Database
+# Initialize SQLite Database+
 def init_db():
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
@@ -100,6 +100,10 @@ def get_history():
         })
         
     return jsonify(history)
+
+@app.route('/history-view')
+def history_page():
+    return render_template('history.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

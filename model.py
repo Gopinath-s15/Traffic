@@ -86,8 +86,10 @@ def train_model():
     
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_color('rgba(0, 242, 254, 0.3)')
-    ax.spines['left'].set_color('rgba(0, 242, 254, 0.3)')
+    # Matplotlib uses tuples for RGBA: (r, g, b, alpha) with values 0 to 1
+    spine_color = (0, 242/255, 254/255, 0.3)
+    ax.spines['bottom'].set_color(spine_color)
+    ax.spines['left'].set_color(spine_color)
     
     ax.set_ylim(0, 115)
     

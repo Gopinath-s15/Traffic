@@ -5,6 +5,7 @@ import shutil
 
 # Get the root directory of the project (one level up from api/)
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+static_dir = os.path.join(base_dir, 'static')
 
 # Ensure Python can find modules in the root directory if needed
 sys.path.append(base_dir)
@@ -160,10 +161,19 @@ def artifact_logo():
 def accuracy_graph():
     return send_from_directory(base_dir, 'accuracy_graph.png')
 
+# Handle PWA files at root scope for proper installation
+@app.route('/sw.js')
+def serve_sw():
+    return send_from_directory(static_dir, 'sw.js', mimetype='application/javascript')
+
+@app.route('/manifest.json')
+def serve_manifest():
+    return send_from_directory(static_dir, 'manifest.json', mimetype='application/manifest+json')
+
 # Special handler for Vercel routing static files
 @app.route('/static/<path:filename>')
 def serve_static(filename):
-    return send_from_directory(os.path.join(base_dir, 'static'), filename)
+    return send_from_directory(static_dir, filename)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

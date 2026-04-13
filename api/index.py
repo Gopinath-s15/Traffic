@@ -13,7 +13,6 @@ sys.path.append(base_dir)
 from flask import Flask, request, jsonify, render_template, send_from_directory
 import sqlite3
 import joblib
-import pandas as pd
 
 # Set explicit paths for templates and static folders relative to the root directory
 app = Flask(__name__, 
@@ -91,8 +90,8 @@ def predict():
     except (KeyError, ValueError):
         return jsonify({'error': 'Invalid input data.'}), 400
 
-    # Format input for model
-    features = pd.DataFrame([[speed, weather, time]], columns=['speed', 'weather', 'time'])
+    # Format input for model (Using a simple 2D list instead of Pandas to save Vercel memory)
+    features = [[speed, weather, time]]
     
     # Predict
     prediction = model.predict(features)[0]

@@ -12,7 +12,6 @@ sys.path.append(base_dir)
 
 from flask import Flask, request, jsonify, render_template, send_from_directory
 import sqlite3
-import joblib
 
 # Set explicit paths for templates and static folders relative to the root directory
 app = Flask(__name__, 
@@ -56,14 +55,7 @@ def init_db():
 init_db()
 
 # --- Load Model ---
-try:
-    model = joblib.load(MODEL_FILE)
-except FileNotFoundError:
-    model = None
-    print(f"Warning: {MODEL_FILE} not found. Ensure model is trained.")
-except Exception as e:
-    model = None
-    print(f"Error loading model: {e}")
+# Model loading is deferred to the /predict route to prevent Vercel 500 timeout/memory crashes on startup.
 
 # Define Risk Levels mapping
 RISK_MAPPING = {
@@ -79,7 +71,11 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if model is None:
+    import joblib
+    try:
+        model = joblib.load(MODEL_FILE)
+    except Exception as e:
+        print(f"Model load error: {e}")
         return jsonify({'error': 'Model not loaded.'}), 500
         
     data = request.json

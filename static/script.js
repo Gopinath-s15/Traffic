@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentLat = null;
     let currentLon = null;
     let riskCircle = null;
+    let lastLat = null;
+    let lastLon = null;
+    let lastTimestamp = null;
 
     // Splash Screen Logic
     const splashScreen = document.getElementById('splash-screen');
@@ -50,42 +53,98 @@ document.addEventListener('DOMContentLoaded', () => {
             if(timeText) timeText.textContent = "Night";
         }
 
-        // 2. Geolocation with Fast Timeout Configuration
+        // 2. Geolocation with Speed Calculation
+        const speedInput = document.getElementById('speed');
+        const speedStatus = document.getElementById('speed-status');
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
         if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(position => {
-                currentLat = position.coords.latitude;
-                currentLon = position.coords.longitude;
-                if(locText) locText.textContent = `${currentLat.toFixed(4)}, ${currentLon.toFixed(4)}`;
+            navigator.geolocation.watchPosition(position => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const timestamp = position.timestamp;
 
-                fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${currentLat}&lon=${currentLon}&appid=da20b70b86564dea7f48b399c78f8875`)
-                .then(res => res.json())
-                .then(data => {
-                    let weatherStr = data.weather[0].main;
-                    console.log("Weather resolved:", weatherStr);
+                // Speed calculation
+                if (lastLat !== null && lastLon !== null && lastTimestamp !== null) {
+                    const distanceKm = calculateDistance(lastLat, lastLon, lat, lon);
+                    const timeDiffHours = (timestamp - lastTimestamp) / (1000 * 60 * 60);
                     
-                    let modelWeather = 0;
-                    if(weatherStr === "Rain") {
-                        weatherValue = 1;
-                        modelWeather = 1;
-                    } else if (["Snow", "Fog", "Thunderstorm", "Mist"].includes(weatherStr)) {
-                        weatherValue = 2;
-                        modelWeather = 2;
-                    } else {
-                        weatherValue = 0;
-                        modelWeather = 0;
-                    }
+                    if (timeDiffHours > 0) {
+                        let calcSpeed = distanceKm / timeDiffHours;
+                        
+                        // Filter out minor GPS drift
+                        if (calcSpeed < 2 && distanceKm < 0.01) {
+                            calcSpeed = 0;
+                        }
+                        
+                        // Device speed property if available overrides manual calculation
+                        if (position.coords.speed !== null && position.coords.speed >= 0) {
+                            calcSpeed = position.coords.speed * 3.6; // convert m/s to km/h
+                        }
 
-                    if (weatherText) weatherText.innerText = weatherStr;
-                    if (weatherInput) weatherInput.value = modelWeather.toString();
-                }).catch(err => {
-                    console.error("OpenWeather API error", err);
-                    if (weatherText) weatherText.innerText = "Error Fetching";
-                });
+                        if (speedInput && calcSpeed >= 0 && calcSpeed <= 300) {
+                            speedInput.value = Math.round(calcSpeed);
+                        }
+                        if (speedStatus) {
+                            speedStatus.textContent = "(Live Speed Detected)";
+                            speedStatus.style.color = "#00e676";
+                        }
+                    }
+                }
+
+                lastLat = lat;
+                lastLon = lon;
+                lastTimestamp = timestamp;
+                currentLat = lat;
+                currentLon = lon;
+
+                if(locText) locText.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+
+                // Fetch weather only if not fetched yet
+                if (weatherText && (weatherText.innerText === "Detecting..." || weatherText.innerText === "Needs Location Permission" || weatherText.innerText === "-")) {
+                    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=da20b70b86564dea7f48b399c78f8875`)
+                    .then(res => res.json())
+                    .then(data => {
+                        let weatherStr = data.weather[0].main;
+                        console.log("Weather resolved:", weatherStr);
+                        
+                        let modelWeather = 0;
+                        if(weatherStr === "Rain") {
+                            weatherValue = 1;
+                            modelWeather = 1;
+                        } else if (["Snow", "Fog", "Thunderstorm", "Mist"].includes(weatherStr)) {
+                            weatherValue = 2;
+                            modelWeather = 2;
+                        } else {
+                            weatherValue = 0;
+                            modelWeather = 0;
+                        }
+
+                        if (weatherText) weatherText.innerText = weatherStr;
+                        if (weatherInput) weatherInput.value = modelWeather.toString();
+                    }).catch(err => {
+                        console.error("OpenWeather API error", err);
+                        if (weatherText) weatherText.innerText = "Error Fetching";
+                    });
+                }
             }, (error) => {
                 console.warn("Geolocation warning:", error.message);
                 if(locText) locText.textContent = "Unavailable / Blocked";
                 if(weatherText) weatherText.innerText = "Needs Location Permission";
-            }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 });
+                if(speedStatus) {
+                    speedStatus.textContent = "(Manual Input Required)";
+                    speedStatus.style.color = "#ffb300";
+                }
+            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
         } else {
             if(locText) locText.textContent = "Not Supported";
             if(weatherText) weatherText.innerText = "-";

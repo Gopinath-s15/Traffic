@@ -43,7 +43,10 @@
         <h2>Predict Accident Risk</h2>
         <form id="prediction-form">
           <div class="form-group">
-            <label for="speed">Vehicle Speed (km/h):</label>
+            <label for="speed" style="display: flex; justify-content: space-between;">
+              Vehicle Speed (km/h):
+              <span id="speed-status" style="font-size:0.85rem; color:var(--acc-primary);">(Auto-detecting...)</span>
+            </label>
             <input type="number" id="speed" name="speed" required min="0" max="300" placeholder="e.g., 80">
           </div>
 

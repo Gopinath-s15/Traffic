@@ -12,19 +12,22 @@ MODEL_FILE = 'model.pkl'
 
 # Initialize SQLite Database+
 def init_db():
-    with sqlite3.connect(DATABASE) as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS predictions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                speed INTEGER,
-                weather INTEGER,
-                time INTEGER,
-                risk_level TEXT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        conn.commit()
+    try:
+        with sqlite3.connect(DATABASE) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS predictions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    speed INTEGER,
+                    weather INTEGER,
+                    time INTEGER,
+                    risk_level TEXT,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            conn.commit()
+    except Exception as e:
+        print(f"Database init skipped (likely read-only environment): {e}")
 
 init_db()
 

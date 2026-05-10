@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 splashScreen.remove(); // Remove from DOM fully after fade out
             }, 800);
-        }, 1500); // Wait 1.5 seconds before fading out
+        }, 2000); // Wait 2 seconds before fading out
     }
 
     // Request notification permission on load

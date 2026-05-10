@@ -476,3 +476,69 @@ tr:hover td {
     box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
     margin-top: 1rem;
 }
+
+/* ==========================================================
+   ANIMATED CSS TRAFFIC LIGHT LOGO
+   ========================================================== */
+.css-traffic-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(145deg, #1a1a2e, #111);
+  border: 2px solid #333;
+  border-radius: 20px;
+  padding: 8px;
+  width: 35px;
+  height: 80px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 15px rgba(0, 242, 254, 0.2);
+  margin-right: 15px;
+  z-index: 100;
+}
+
+.css-traffic-logo.splash {
+  width: 60px;
+  height: 150px;
+  padding: 15px;
+  border-radius: 35px;
+  margin: 0 auto 20px auto;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.4);
+}
+
+.css-traffic-logo .light {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #222;
+  transition: all 0.3s ease;
+}
+
+.css-traffic-logo.splash .light {
+  width: 28px;
+  height: 28px;
+}
+
+.css-traffic-logo .light.red {
+  animation: blinkRed 3s infinite;
+}
+.css-traffic-logo .light.yellow {
+  animation: blinkYellow 3s infinite;
+}
+.css-traffic-logo .light.green {
+  animation: blinkGreen 3s infinite;
+}
+
+@keyframes blinkRed {
+  0%, 30% { background: #ff3333; box-shadow: 0 0 15px #ff3333, inset 0 0 5px rgba(255,255,255,0.5); }
+  33%, 100% { background: #222; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+}
+@keyframes blinkYellow {
+  0%, 30% { background: #222; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+  33%, 63% { background: #ffcc00; box-shadow: 0 0 15px #ffcc00, inset 0 0 5px rgba(255,255,255,0.5); }
+  66%, 100% { background: #222; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+}
+@keyframes blinkGreen {
+  0%, 63% { background: #222; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+  66%, 96% { background: #33ff33; box-shadow: 0 0 15px #33ff33, inset 0 0 5px rgba(255,255,255,0.5); }
+  100% { background: #222; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+}

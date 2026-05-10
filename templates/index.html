@@ -16,20 +16,28 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#00f2fe">
-  <link rel="icon" type="image/png" href="/artifact-logo">
+  <link rel="icon" type="image/png" href="/static/shield.png">
 </head>
 
 <body>
   <!-- Splash Screen -->
   <div id="splash-screen">
-    <img src="/artifact-logo" alt="Traffic Logo" class="splash-logo">
+    <div class="css-traffic-logo splash">
+      <div class="light red"></div>
+      <div class="light yellow"></div>
+      <div class="light green"></div>
+    </div>
     <h2 style="color: #00f2fe; margin-top:20px; font-family: 'Outfit', sans-serif;">Initializing System...</h2>
   </div>
 
   <div class="dashboard">
     <header class="glow-header">
       <div class="header-title-row">
-        <img src="/artifact-logo" alt="Traffic Light Logo" class="header-icon">
+        <div class="css-traffic-logo">
+          <div class="light red"></div>
+          <div class="light yellow"></div>
+          <div class="light green"></div>
+        </div>
         <h1>Intelligent Traffic Safety</h1>
       </div>
       <p>AI-Powered Risk Prediction & Alerts</p>

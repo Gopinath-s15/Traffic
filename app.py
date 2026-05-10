@@ -117,5 +117,13 @@ def artifact_logo():
 def accuracy_graph():
     return send_from_directory(r'c:\Users\virat\Desktop\traffic', 'accuracy_graph.png')
 
+@app.route('/sw.js')
+def serve_sw():
+    return send_from_directory('static', 'sw.js', mimetype='application/javascript')
+
+@app.route('/manifest.json')
+def serve_manifest():
+    return send_from_directory('static', 'manifest.json', mimetype='application/manifest+json')
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

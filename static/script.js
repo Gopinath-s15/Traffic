@@ -153,6 +153,13 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Unlock audio context on user interaction to ensure voice works on mobile
+            if ('speechSynthesis' in window) {
+                const dummy = new SpeechSynthesisUtterance("");
+                dummy.volume = 0;
+                window.speechSynthesis.speak(dummy);
+            }
+
             const speed = document.getElementById('speed').value;
             let weather = weatherValue;
             const time = document.getElementById('time').value;
@@ -169,8 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 displayResult(data.risk);
             } catch (error) {
-                console.error(error);
-                alert("Error predicting risk.");
+                console.error("Prediction Error:", error);
+                alert("Error predicting risk. Please check your connection or input.");
             }
         });
     }
@@ -230,26 +237,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function triggerHighRiskAlerts() {
-        // 1. Phone Vibration
-        if (navigator.vibrate) {
-            navigator.vibrate([500, 250, 500, 250, 500]); // Vibrate pattern
-        }
+        try {
+            // 1. Phone Vibration
+            if (navigator.vibrate) {
+                navigator.vibrate([500, 250, 500, 250, 500]); // Vibrate pattern
+            }
 
-        // 2. Voice Alert
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance("Slow down! High accident risk detected.");
-            utterance.rate = 1.0;
-            utterance.pitch = 1.2;
-            utterance.volume = 1;
-            window.speechSynthesis.speak(utterance);
-        }
+            // 2. Voice Alert
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("Slow down! High accident risk detected.");
+                utterance.rate = 1.0;
+                utterance.pitch = 1.2;
+                utterance.volume = 1;
+                window.speechSynthesis.speak(utterance);
+            }
 
-        // 3. Mobile / Desktop Notification
-        if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("HIGH RISK ALERT", {
-                body: "Accident risk is high based on current conditions. Please SLOW DOWN.",
-                icon: "/static/alert-icon.png" // Placeholder just in case
-            });
+            // 3. Mobile / Desktop Notification
+            if ("Notification" in window && Notification.permission === "granted") {
+                if (navigator.serviceWorker) {
+                    navigator.serviceWorker.ready.then(function(registration) {
+                        try {
+                            registration.showNotification("HIGH RISK ALERT", {
+                                body: "Accident risk is high based on current conditions. Please SLOW DOWN.",
+                                icon: "/static/shield.png",
+                                vibrate: [500, 250, 500, 250, 500]
+                            });
+                        } catch(e) {
+                            console.warn("SW Notification error", e);
+                        }
+                    });
+                } else {
+                    try {
+                        new Notification("HIGH RISK ALERT", {
+                            body: "Accident risk is high based on current conditions. Please SLOW DOWN.",
+                            icon: "/static/shield.png"
+                        });
+                    } catch(e) {
+                        console.warn("Standard Notification error", e);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Alert trigger error:", err);
         }
     }
 

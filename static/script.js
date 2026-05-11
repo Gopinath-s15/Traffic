@@ -212,10 +212,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mapContainer && currentLat && currentLon) {
             if (!riskMap) {
                 riskMap = L.map('risk-map').setView([currentLat, currentLon], 14);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap & CARTO',
-                    subdomains: 'abcd',
-                    maxZoom: 20
+                L.tileLayer('https://{s}.google.com/vt/lyrs=y,traffic&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '&copy; Google Maps'
                 }).addTo(riskMap);
             } else {
                 riskMap.setView([currentLat, currentLon], 14);

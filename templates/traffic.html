@@ -4,18 +4,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Graphical analysis of Intelligent Traffic Safety predictions. Visualizing AI-driven road safety insights.">
-  <meta name="keywords" content="traffic safety, intelligent traffic system, AI accident prediction, road safety, DSS, traffic risk graph">
-  <meta name="author" content="Your Name">
-  <title>Traffic Safety Analytics - DSS Graph</title>
+  <meta name="description" content="Live traffic conditions for the Intelligent Traffic Safety Decision Support System.">
+  <title>Live Traffic - Traffic Safety DSS</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#00f2fe">
   <link rel="icon" type="image/png" href="/static/shield.png">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -34,17 +33,15 @@
 
     <nav class="navbar">
       <a href="/" class="nav-link">Dashboard</a>
-      <a href="/traffic-view" class="nav-link">Live Traffic</a>
+      <a href="/traffic-view" class="nav-link active">Live Traffic</a>
       <a href="/history-view" class="nav-link">History Log</a>
-      <a href="/graph-view" class="nav-link active">Graph View</a>
+      <a href="/graph-view" class="nav-link">Graph View</a>
     </nav>
 
     <div class="main-content">
-      <section class="card history-section" style="width: 100%; max-width: 900px;">
-        <h2>Historical Risk Analysis</h2>
-        <div class="graph-container" style="position: relative; height: 50vh; width: 100%">
-          <canvas id="historyChart"></canvas>
-        </div>
+      <section class="traffic-section card" style="height: 65vh; display: flex; flex-direction: column;">
+        <h2 style="margin-bottom: 1rem;">Live Traffic Conditions</h2>
+        <div id="live-traffic-map" style="flex: 1; width: 100%; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);"></div>
       </section>
     </div>
   </div>
@@ -53,7 +50,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/static/sw.js');
+        navigator.serviceWorker.register('/sw.js');
       });
     }
   </script>

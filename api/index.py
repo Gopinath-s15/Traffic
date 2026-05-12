@@ -139,6 +139,10 @@ def get_history():
 def history_page():
     return render_template('history.html')
 
+@app.route('/traffic-view')
+def traffic_page():
+    return render_template('traffic.html')
+
 @app.route('/graph-view')
 def graph_page():
     return render_template('graph.html')

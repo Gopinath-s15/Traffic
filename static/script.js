@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyTableBody = document.querySelector('#history-table tbody');
 
     let riskMap = null;
+    let liveTrafficMap = null;
     let currentLat = null;
     let currentLon = null;
     let riskCircle = null;
@@ -36,21 +37,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let weatherValue = 0;
 
-    if (form) {
-        const locText = document.getElementById('loc-text');
-        const weatherText = document.getElementById('weatherText');
-        const timeText = document.getElementById('time-text');
-        const weatherInput = document.getElementById('weather');
-        const timeInput = document.getElementById('time');
+    const locText = document.getElementById('loc-text');
+    const weatherText = document.getElementById('weatherText');
+    const timeText = document.getElementById('time-text');
+    const weatherInput = document.getElementById('weather');
+    const timeInput = document.getElementById('time');
 
         // 1. Time of Day Detection
         const currentHour = new Date().getHours();
         if (currentHour >= 6 && currentHour < 18) {
-            timeInput.value = "0";
-            if(timeText) timeText.textContent = "Day";
+            if (timeInput) timeInput.value = "0";
+            if (timeText) timeText.textContent = "Day";
         } else {
-            timeInput.value = "1";
-            if(timeText) timeText.textContent = "Night";
+            if (timeInput) timeInput.value = "1";
+            if (timeText) timeText.textContent = "Night";
         }
 
         // 2. Geolocation with Speed Calculation
@@ -61,10 +61,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const R = 6371; // Earth's radius in km
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function initFallbackMap() {
+            const trafficMapContainer = document.getElementById('live-traffic-map');
+            if (trafficMapContainer && !liveTrafficMap) {
+                liveTrafficMap = L.map('live-traffic-map').setView([20.5937, 78.9629], 4);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap & CARTO', subdomains: 'abcd', maxZoom: 20
+                }).addTo(liveTrafficMap);
+                L.tileLayer('https://mt1.google.com/vt?lyrs=h,traffic&x={x}&y={y}&z={z}', {
+                    maxZoom: 20, opacity: 0.9, attribution: ' | Traffic &copy; Google'
+                }).addTo(liveTrafficMap);
+            }
         }
 
         if ("geolocation" in navigator) {
@@ -77,15 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (lastLat !== null && lastLon !== null && lastTimestamp !== null) {
                     const distanceKm = calculateDistance(lastLat, lastLon, lat, lon);
                     const timeDiffHours = (timestamp - lastTimestamp) / (1000 * 60 * 60);
-                    
+
                     if (timeDiffHours > 0) {
                         let calcSpeed = distanceKm / timeDiffHours;
-                        
+
                         // Filter out minor GPS drift
                         if (calcSpeed < 2 && distanceKm < 0.01) {
                             calcSpeed = 0;
                         }
-                        
+
                         // Device speed property if available overrides manual calculation
                         if (position.coords.speed !== null && position.coords.speed >= 0) {
                             calcSpeed = position.coords.speed * 3.6; // convert m/s to km/h
@@ -107,49 +120,74 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentLat = lat;
                 currentLon = lon;
 
-                if(locText) locText.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                if (locText) locText.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+
+                // Initialize Live Traffic Map
+                const trafficMapContainer = document.getElementById('live-traffic-map');
+                if (trafficMapContainer && currentLat && currentLon) {
+                    if (!liveTrafficMap) {
+                        liveTrafficMap = L.map('live-traffic-map').setView([currentLat, currentLon], 14);
+                        
+                        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                            attribution: '&copy; OpenStreetMap & CARTO',
+                            subdomains: 'abcd',
+                            maxZoom: 20
+                        }).addTo(liveTrafficMap);
+
+                        L.tileLayer('https://mt1.google.com/vt?lyrs=h,traffic&x={x}&y={y}&z={z}', {
+                            maxZoom: 20,
+                            opacity: 0.9,
+                            attribution: ' | Traffic &copy; Google'
+                        }).addTo(liveTrafficMap);
+                    } else {
+                        liveTrafficMap.setView([currentLat, currentLon], 14);
+                    }
+                }
 
                 // Fetch weather only if not fetched yet
                 if (weatherText && (weatherText.innerText === "Detecting..." || weatherText.innerText === "Needs Location Permission" || weatherText.innerText === "-")) {
                     fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=da20b70b86564dea7f48b399c78f8875`)
-                    .then(res => res.json())
-                    .then(data => {
-                        let weatherStr = data.weather[0].main;
-                        console.log("Weather resolved:", weatherStr);
-                        
-                        let modelWeather = 0;
-                        if(weatherStr === "Rain") {
-                            weatherValue = 1;
-                            modelWeather = 1;
-                        } else if (["Snow", "Fog", "Thunderstorm", "Mist"].includes(weatherStr)) {
-                            weatherValue = 2;
-                            modelWeather = 2;
-                        } else {
-                            weatherValue = 0;
-                            modelWeather = 0;
-                        }
+                        .then(res => res.json())
+                        .then(data => {
+                            let weatherStr = data.weather[0].main;
+                            console.log("Weather resolved:", weatherStr);
 
-                        if (weatherText) weatherText.innerText = weatherStr;
-                        if (weatherInput) weatherInput.value = modelWeather.toString();
-                    }).catch(err => {
-                        console.error("OpenWeather API error", err);
-                        if (weatherText) weatherText.innerText = "Error Fetching";
-                    });
+                            let modelWeather = 0;
+                            if (weatherStr === "Rain") {
+                                weatherValue = 1;
+                                modelWeather = 1;
+                            } else if (["Snow", "Fog", "Thunderstorm", "Mist"].includes(weatherStr)) {
+                                weatherValue = 2;
+                                modelWeather = 2;
+                            } else {
+                                weatherValue = 0;
+                                modelWeather = 0;
+                            }
+
+                            if (weatherText) weatherText.innerText = weatherStr;
+                            if (weatherInput) weatherInput.value = modelWeather.toString();
+                        }).catch(err => {
+                            console.error("OpenWeather API error", err);
+                            if (weatherText) weatherText.innerText = "Error Fetching";
+                        });
                 }
             }, (error) => {
                 console.warn("Geolocation warning:", error.message);
-                if(locText) locText.textContent = "Unavailable / Blocked";
-                if(weatherText) weatherText.innerText = "Needs Location Permission";
-                if(speedStatus) {
+                if (locText) locText.textContent = "Unavailable / Blocked";
+                if (weatherText) weatherText.innerText = "Needs Location Permission";
+                if (speedStatus) {
                     speedStatus.textContent = "(Manual Input Required)";
                     speedStatus.style.color = "#ffb300";
                 }
-            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+                initFallbackMap();
+            }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
         } else {
-            if(locText) locText.textContent = "Not Supported";
-            if(weatherText) weatherText.innerText = "-";
+            if (locText) locText.textContent = "Not Supported";
+            if (weatherText) weatherText.innerText = "-";
+            initFallbackMap();
         }
 
+    if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -212,10 +250,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mapContainer && currentLat && currentLon) {
             if (!riskMap) {
                 riskMap = L.map('risk-map').setView([currentLat, currentLon], 14);
-                L.tileLayer('https://{s}.google.com/vt/lyrs=y,traffic&x={x}&y={y}&z={z}', {
-                    maxZoom: 20,
-                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                    attribution: '&copy; Google Maps'
+                
+                // 1. Base Dark Map
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap & CARTO',
+                    subdomains: 'abcd',
+                    maxZoom: 20
                 }).addTo(riskMap);
             } else {
                 riskMap.setView([currentLat, currentLon], 14);
@@ -224,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { riskMap.invalidateSize(); }, 300);
 
             if (riskCircle) riskMap.removeLayer(riskCircle);
-            
+
             riskCircle = L.circle([currentLat, currentLon], {
                 color: mapColor,
                 fillColor: mapColor,
@@ -255,14 +295,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // 3. Mobile / Desktop Notification
             if ("Notification" in window && Notification.permission === "granted") {
                 if (navigator.serviceWorker) {
-                    navigator.serviceWorker.ready.then(function(registration) {
+                    navigator.serviceWorker.ready.then(function (registration) {
                         try {
                             registration.showNotification("HIGH RISK ALERT", {
                                 body: "Accident risk is high based on current conditions. Please SLOW DOWN.",
                                 icon: "/static/shield.png",
                                 vibrate: [500, 250, 500, 250, 500]
                             });
-                        } catch(e) {
+                        } catch (e) {
                             console.warn("SW Notification error", e);
                         }
                     });
@@ -272,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             body: "Accident risk is high based on current conditions. Please SLOW DOWN.",
                             icon: "/static/shield.png"
                         });
-                    } catch(e) {
+                    } catch (e) {
                         console.warn("Standard Notification error", e);
                     }
                 }
@@ -325,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('/history');
             const data = await response.json();
-            
+
             let lowCount = 0;
             let medCount = 0;
             let highCount = 0;
